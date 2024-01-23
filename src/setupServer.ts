@@ -19,9 +19,11 @@ import compression from "compression";
 import { configFile } from "./config";
 import { response200 } from "./shared/global/responses/sucessResponse";
 import verifyToken from "./shared/global/auth/verifyToken";
+import { generateToken } from "./shared/global/auth/generateToken";
 // import { Server } from "http";
 
 export class itbook {
+  private apiVersion = "api/v1";
   private app: Application;
   constructor(app: Application) {
     this.app = app;
@@ -73,10 +75,25 @@ export class itbook {
     /**
      * To check the health of the Application.
      */
-
-    app.get("/ping", verifyToken, Requests.validationRequest, (req, res) => {
-      response200(res, "working");
+    app.post("/createUser", async (req, res) => {
+      try {
+        const token = await generateToken("santhosh", "admin");
+        return response200(res, token);
+      } catch (error) {}
     });
+    app.get(
+      "/ping",
+      verifyToken,
+      Requests.validationRequest,
+      (req: Request, res) => {
+        console.log({ req: req });
+        response200(res, "data");
+      }
+    );
+    /**
+     * movies
+     */
+    app.use(`${this.apiVersion}/movies`, () => {});
   }
   private globalHandler(app: Application): void {}
   private startServer(app: Application): void {
